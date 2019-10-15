@@ -1,5 +1,6 @@
 data/tmp/*
 tmp_code/*
+tmp/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -19,7 +19,7 @@
 
 <body>
     <!-- banner -->
-    <div class="jumbotron jumbotron-fluid" id="banner" style="background-image: url(../static/img/frontpage.jpg);">
+    <div class="jumbotron jumbotron-fluid" id="banner" style="background-image: url(../static/img/frontpage.jpg)">
         <div class="container text-center text-md-left">
             <header>
                 <div class="row justify-content-between">
@@ -32,8 +32,10 @@
                 </div>
             </header>
             <h1 data-aos="fade" data-aos-easing="linear" data-aos-duration="1000" data-aos-once="true" class="display-3 text-white font-weight-bold my-5">
-            	Dashbaord<br>
+            	Dashboard<br>
             </h1>
+            <!-- <div id="map"></div> -->
+            
             <!-- <p data-aos="fade" data-aos-easing="linear" data-aos-duration="1000" data-aos-once="true" class="lead text-white my-4">
                 Enegery consumption by source, by state and by year. 
                 <br> What is the trend? 
@@ -44,11 +46,12 @@
     <!-- three-blcok -->
     <div class="container my-5 py-2">
         <h2 class="text-center font-weight-bold my-5">Heatmap</h2>
-        
+        <h5>SELECT Year:</h5>
+          <select id="selDataset" onchange="optionChanged(this.value)"></select>
+          <div id = "map"></div>
+            
         
               
-        
-
     </div>
 
 
@@ -60,6 +63,9 @@
       AOS.init({
       });
     </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.5.0/d3.js"></script>
+
+        <!-- <script src="{{ url_for('static', filename='js/app.js') }}"></script> -->
 </body>
 
 </html>

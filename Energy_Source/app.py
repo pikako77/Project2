@@ -72,7 +72,6 @@ def get_state():
     data = pd.read_sql(sql, conn)
     conn.close()
 
-    print(data["State"])
     # Return a list of the column names (sample names)
     return jsonify(list(data["State"]))
 
@@ -140,6 +139,29 @@ def select_data_per_state(energy_type,state):
     # return data.to_json(orient="records")
     return jsonify(selected_data)
 
+@app.route("/energy_type/<state>/<yr>")
+def select_energyType_per_state_year(state,yr):
+    engine = create_engine("sqlite:///db/Alltypes.sqlite")
+
+    sql = f"select * from Alltypes"
+    
+    # result = engine.execute("sql statement")
+
+    conn = engine.connect()
+  
+    data = pd.read_sql(sql, conn)
+    conn.close()
+    tmp = data[data['State'] == state]
+    sel_data =tmp[yr].tolist()
+    # print(sel_data)
+    data_label =['Coal','NaturalGas','Petroleum','Nuclear','Renewable']
+    selected_data ={
+        "EnergyType": data_label, 
+        "consumption" : sel_data
+    }
+
+    # print(selected_data)
+    return jsonify(selected_data)
 
 if __name__ == "__main__":
     app.run(port=5008, debug=True)

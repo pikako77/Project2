@@ -91,8 +91,8 @@ def select_data(energy_type, yr):
     return data.to_json(orient="records")
     # return jsonify(data)
     
-@app.route("/<energy_type>")
-def select_data_per_state(energy_type,state='AK'):
+@app.route("/data/<energy_type>/<state>")
+def select_data_per_state(energy_type,state):
     
     engine = create_engine("sqlite:///db/Alltypes.sqlite")
     conn = engine.connect()
@@ -102,10 +102,30 @@ def select_data_per_state(energy_type,state='AK'):
     conn.close()
 
     tmp = data[data['Type'] == energy_type]
-    selected_data = tmp[tmp['State']==state]
+    consumption_data_tmp = tmp[tmp['State']==state].iloc[0].tolist()
 
+    # test_Data ={}
 
-    return selected_data.to_json(orient="records")
+    yr = []
+    consumption = []
+    print(consumption_data_tmp)
+    for i in range(2,len(data.columns)):
+        yr.append( (data.columns)[i])
+        consumption.append(consumption_data_tmp[i])
+        # print(selected_data.loc[0])
+        # print()
+
+    # print(yr)
+    
+    selected_data={
+        "consumption": consumption,
+        "yr": yr, 
+    }
+
+    # data = pd.DataFrame(selected_data)
+    
+    # return data.to_json(orient="records")
+    return jsonify(selected_data)
 
 
 if __name__ == "__main__":

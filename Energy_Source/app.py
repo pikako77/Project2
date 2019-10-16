@@ -52,7 +52,7 @@ def get_data():
   conn.close()
   return Alltypes_df.to_json(orient="records")
 
-@app.route("/year")
+@app.route("/data/year")
 def get_year():
     engine = create_engine("sqlite:///db/Alltypes.sqlite")
     conn = engine.connect()
@@ -62,6 +62,19 @@ def get_year():
     conn.close()
     # Return a list of the column names (sample names)
     return jsonify(list(data.columns)[2:])
+
+@app.route("/data/state")
+def get_state():
+    engine = create_engine("sqlite:///db/Alltypes.sqlite")
+    conn = engine.connect()
+  
+    sql = f"select * from Alltypes"
+    data = pd.read_sql(sql, conn)
+    conn.close()
+
+    print(data["State"])
+    # Return a list of the column names (sample names)
+    return jsonify(list(data["State"]))
 
 
 @app.route("/<energy_type>/<yr>")

@@ -30,7 +30,7 @@ app = Flask(__name__)
 # Samples_Metadata = Base.classes.sample_metadata
 # Samples = Base.classes.samples
 
-
+db ="sqlite:///db/Alltypes.sqlite"
 
 @app.route("/")
 def index():
@@ -61,7 +61,7 @@ def history():
 @app.route("/data")
 def get_data():
 
-  engine = create_engine("sqlite:///db/Alltypes.sqlite")
+  engine = create_engine(db)
   conn = engine.connect()
   
   sql = f"select * from Alltypes"
@@ -71,7 +71,7 @@ def get_data():
 
 @app.route("/data/year")
 def get_year():
-    engine = create_engine("sqlite:///db/Alltypes.sqlite")
+    engine = create_engine(db)
     conn = engine.connect()
   
     sql = f"select * from Alltypes"
@@ -82,7 +82,7 @@ def get_year():
 
 @app.route("/data/state")
 def get_state():
-    engine = create_engine("sqlite:///db/Alltypes.sqlite")
+    engine = create_engine(db)
     conn = engine.connect()
   
     sql = f"select * from Alltypes"
@@ -101,11 +101,9 @@ def set_energyType():
 
 @app.route("/<energy_type>/<yr>")
 def select_data(energy_type, yr):
-    engine = create_engine("sqlite:///db/Alltypes.sqlite")
+    engine = create_engine(db)
 
     sql = f"select * from Alltypes"
-    
-    # result = engine.execute("sql statement")
 
     conn = engine.connect()
   
@@ -129,7 +127,7 @@ def select_data(energy_type, yr):
 @app.route("/data/<energy_type>/<state>")
 def select_data_per_state(energy_type,state):
     
-    engine = create_engine("sqlite:///db/Alltypes.sqlite")
+    engine = create_engine(db)
     conn = engine.connect()
   
     sql = f"select * from Alltypes"
@@ -164,7 +162,7 @@ def select_data_per_state(energy_type,state):
 
 @app.route("/energy_type/<state>/<yr>")
 def select_energyType_per_state_year(state,yr):
-    engine = create_engine("sqlite:///db/Alltypes.sqlite")
+    engine = create_engine(db)
 
     sql = f"select * from Alltypes"
     

@@ -10,6 +10,7 @@ from sqlalchemy import create_engine
 
 from flask import Flask, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
+import json
 
 app = Flask(__name__)
 
@@ -68,7 +69,7 @@ def get_data():
   conn.close()
   return Alltypes_df.to_json(orient="records")
 
-@app.route("/year")
+@app.route("/data/year")
 def get_year():
     engine = create_engine("sqlite:///db/Alltypes.sqlite")
     conn = engine.connect()
@@ -78,6 +79,24 @@ def get_year():
     conn.close()
     # Return a list of the column names (sample names)
     return jsonify(list(data.columns)[2:])
+
+@app.route("/data/state")
+def get_state():
+    engine = create_engine("sqlite:///db/Alltypes.sqlite")
+    conn = engine.connect()
+  
+    sql = f"select * from Alltypes"
+    data = pd.read_sql(sql, conn)
+    conn.close()
+
+    # Return a list of the column names (sample names)
+    return jsonify(list(data["State"].head(52)))
+
+@app.route("/data/energyType")
+def set_energyType():
+    energyType = ['Coal','Natural Gas','Petroleum','Nuclear','Renewable']
+
+    return jsonify(energyType)
 
 
 @app.route("/<energy_type>/<yr>")
@@ -107,8 +126,8 @@ def select_data(energy_type, yr):
     return data.to_json(orient="records")
     # return jsonify(data)
     
-@app.route("/<energy_type>")
-def select_data_per_state(energy_type,state='AK'):
+@app.route("/data/<energy_type>/<state>")
+def select_data_per_state(energy_type,state):
     
     engine = create_engine("sqlite:///db/Alltypes.sqlite")
     conn = engine.connect()
@@ -118,11 +137,54 @@ def select_data_per_state(energy_type,state='AK'):
     conn.close()
 
     tmp = data[data['Type'] == energy_type]
-    selected_data = tmp[tmp['State']==state]
+    consumption_data_tmp = tmp[tmp['State']==state].iloc[0].tolist()
 
+    # test_Data ={}
 
-    return selected_data.to_json(orient="records")
+    yr = []
+    consumption = []
+    print(consumption_data_tmp)
+    for i in range(2,len(data.columns)):
+        yr.append( (data.columns)[i])
+        consumption.append(consumption_data_tmp[i])
+        # print(selected_data.loc[0])
+        # print()
 
+    # print(yr)
+    
+    selected_data={
+        "consumption": consumption,
+        "yr": yr, 
+    }
+
+    # data = pd.DataFrame(selected_data)
+    
+    # return data.to_json(orient="records")
+    return jsonify(selected_data)
+
+@app.route("/energy_type/<state>/<yr>")
+def select_energyType_per_state_year(state,yr):
+    engine = create_engine("sqlite:///db/Alltypes.sqlite")
+
+    sql = f"select * from Alltypes"
+    
+    # result = engine.execute("sql statement")
+
+    conn = engine.connect()
+  
+    data = pd.read_sql(sql, conn)
+    conn.close()
+    tmp = data[data['State'] == state]
+    sel_data =tmp[yr].tolist()
+    # print(sel_data)
+    data_label =['Coal','NaturalGas','Petroleum','Nuclear','Renewable']
+    selected_data ={
+        "EnergyType": data_label, 
+        "consumption" : sel_data
+    }
+
+    # print(selected_data)
+    return jsonify(selected_data)
 
 if __name__ == "__main__":
     app.run(port=5012, debug=True)

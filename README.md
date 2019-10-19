@@ -33,9 +33,10 @@
 ##### To run the app, you need to install flask and sqlAlchemy
 <br>
 ### How to run
-##### In terminal, ``` conda activate PythonData```, <br>
-then start the server by typing ```python app.py```<br>
-Open the web browser and redirect to your server ```http://127.0.0.1:5000/```
+##### In terminal, 
+``` conda activate PythonData```
+##### then start the server by typing ```python app.py```<br>
+##### Open the web browser and redirect to your server ```http://127.0.0.1:5000/```
 
 
 

@@ -55,15 +55,15 @@
     </div>
     <!-- three-blcok -->
     <div class="container my-5 py-2">
-        <h2 class="text-center font-weight-bold my-5">Heatmap</h2>
+        <h2 class="text-center font-weight-bold my-5"></h2>
         <div>
             <h5>Select the year:</h5>
 
-            <select id="selDataset_yr" onchange="optionChanged(this.value)"></select>
-
+            <select id="selDataset_yr" onchange="optionChanged_yr(this.value)"></select>
+            <br><br>
             <h5>Select the state:</h5>
-            <select id="selDataset_enegeryType" onchange="optionChanged(this.value)"></select>
-        </div>
+            <select id="selDataset_enegeryType" onchange="optionChanged_nrg(this.value)"></select>
+            <br></div>
 
         
         <div class="row">
@@ -71,7 +71,7 @@
             <div class="col-sm-1"> 
               <div class="chart-wrapper">
                 <div class="chart-title">
-                  Map
+                  <br>
                 </div>
                 <div class="chart-stage">
                   <div id="map"style="width: 1000px; height: 800px" ></div>
@@ -93,13 +93,15 @@
       });
     </script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.5.0/d3.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.0.6/chroma.min.js"></script>
+
 
     <!-- <script src="{{ url_for('static', filename='js/app.js') }}"></script> -->
     <!-- API key -->
     <script type="text/javascript" src="../static/js/config.js"></script>
     <script type="text/javascript" src="../static/js/us-states.js"></script>
     <script type="text/javascript" src="../static/js/logic.js"></script>
-    <script type="text/javascript" src="../static/js/chroma.js"></script>
+    <!-- <script type="text/javascript" src="../static/js/chroma.js"></script> -->
 
 </body>
 

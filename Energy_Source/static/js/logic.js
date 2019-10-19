@@ -1,6 +1,10 @@
 let energyType = 'Coal';
 let yr = 1960;
 let normalizationConst = 10e3;
+let ColorStep = 9;
+let ColorStart = "#ffff99";//"#fafa6e";
+let ColorMid = '#ff0038';//"#fafa6e";
+let ColorEnd = '#002e63';//"#2A4858";
 
 function init() {
 
@@ -68,15 +72,15 @@ function get_interval(var_min, var_max, ColorStep){
 	let start_val = Math.floor(var_min / 10) * 10;
 	let end_val = Math.floor(var_max / 10) * 10;
 
-	console.log("get_interval");
-	console.log("start:",start_val);
-	console.log("end:",end_val);
+	// console.log("get_interval");
+	// console.log("start:",start_val);
+	// console.log("end:",end_val);
 
 	for (let i = start_val; i < ColorStep; i++){
 		interval[i] = start_val + i * (end_val - start_val)/(ColorStep+1);
 	}
 
-	console.log(interval);
+	// console.log(interval);
 	return interval;
 }
 
@@ -84,35 +88,40 @@ function findIndex(val, interval){
 	let valColorIdx = -1; // initialization
 
 	for (let i = 0; i < interval.length; i++){
-		if (val >interval[i] && val < interval[i+1]) {
+		if (val >interval[i] && val <= interval[i+1]) {
 			valColorIdx = i;
 		}
 	}
-	console.log('findIndex()');
-	console.log('val,interval[i], interval[i+1] ', val , interval[valColorIdx], interval[valColorIdx+1]);
+	// console.log('findIndex()');
+	// console.log('val,interval[i], interval[i+1] ', val , interval[valColorIdx], interval[valColorIdx+1]);
 	return valColorIdx;
 }
 
+function getColorScale(colorStart, colorMid, colorEnd){
+	const scaleLch = chroma.scale([colorStart, colorMid, colorEnd])
+	.mode("lch")
+	.colors(ColorStep);
 
+	return scaleLch;
+
+}
 function getColor(d , var_min, var_max, ColorStep) {
 	// 	chroma.scale(['#fafa6e','#2A4858'])
 	// .mode('lch').colors(6);
 	// Initialize Chroma.
-	const scaleLch = chroma.scale(["#fafa6e", "#2A4858"])
-					.mode("lch")
-					.colors(ColorStep);
+	const scaleLch = getColorScale( ColorStart ,ColorMid, ColorEnd);
 	
 	let idx = -1;
 	
-	console.log("getColor()");
-	console.log("var_min, var_max, step",var_min, var_max, ColorStep );
+	// console.log("getColor()");
+	// console.log("var_min, var_max, step",var_min, var_max, ColorStep );
 	ColorScaleInterval = get_interval(var_min, var_max, ColorStep); 
 	idx = findIndex(d, ColorScaleInterval);
 
 	let colorVal = scaleLch[idx];
 
-	console.log(idx);
-	console.log(scaleLch.length);
+	// console.log(idx);
+	// console.log(scaleLch.length);
 	return colorVal;
 }
 // Creating map object
@@ -258,20 +267,28 @@ function build_map(energyType, yr) {
 		info.addTo(myMap);
 
 
-
+		console.log('before legend.onAdd');
+		console.log(consumption_min);
 		legend.onAdd = function (myMap) {
 
 			grades = [];
-
+			console.log('legend.onAdd');
+			console.log(consumption_min,consumption_max, ColorStep );
 			var div = L.DomUtil.create('div', 'info legend'),
-				grades = [0, 1000, 2000, 5000, 10000, 50000, 1000000, 1500000],
+				// grades = [0, 1000, 2000, 5000, 10000, 50000, 1000000, 1500000];
+				// labels = [];
+				grades =  get_interval(consumption_min, consumption_max, ColorStep), 
 				labels = [];
+				 console.log('grades',grades);
+				 console.log(consumption_array);
+				colorScale = getColorScale( ColorStart , ColorMid, ColorEnd);
+				console.log('colorScale',colorScale);
 
 			// loop through our density intervals and generate a label with a colored square for each interval
 			for (var i = 0; i < grades.length; i++) {
 				div.innerHTML +=
-					'<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
-					grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+					'<i style="background:' + colorScale[i+1] +'"></i> ' +
+					grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + 'x 1000' + '<br>' : '+');
 			}
 
 			return div;

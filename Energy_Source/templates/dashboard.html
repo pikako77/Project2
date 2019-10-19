@@ -59,10 +59,10 @@
         <div>
             <h5>Select the year:</h5>
 
-            <select id="selDataset_yr" onchange="optionChanged_yr(this.value)"></select>
+            <select id="selDataset_yr" onchange="optionChanged(this.value)"></select>
 
             <h5>Select the state:</h5>
-            <select id="selDataset_enegeryType" onchange="optionChanged_nrg(this.value)"></select>
+            <select id="selDataset_enegeryType" onchange="optionChanged(this.value)"></select>
         </div>
 
         
@@ -93,14 +93,13 @@
       });
     </script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.5.0/d3.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.0.6/chroma.min.js "></script>
 
     <!-- <script src="{{ url_for('static', filename='js/app.js') }}"></script> -->
     <!-- API key -->
     <script type="text/javascript" src="../static/js/config.js"></script>
     <script type="text/javascript" src="../static/js/us-states.js"></script>
     <script type="text/javascript" src="../static/js/logic.js"></script>
-    <!-- <script type="text/javascript" src="../static/js/chroma.js"></script> -->
+    <script type="text/javascript" src="../static/js/chroma.js"></script>
 
 </body>
 

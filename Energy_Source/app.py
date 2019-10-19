@@ -30,7 +30,7 @@ app = Flask(__name__)
 # Samples_Metadata = Base.classes.sample_metadata
 # Samples = Base.classes.samples
 
-
+db ="sqlite:///db/Alltypes.sqlite"
 
 @app.route("/")
 def index():
@@ -88,7 +88,7 @@ def renewable():
 @app.route("/data")
 def get_data():
 
-  engine = create_engine("sqlite:///db/Alltypes.sqlite")
+  engine = create_engine(db)
   conn = engine.connect()
   
   sql = f"select * from Alltypes"
@@ -98,18 +98,23 @@ def get_data():
 
 @app.route("/data/year")
 def get_year():
-    engine = create_engine("sqlite:///db/Alltypes.sqlite")
+    engine = create_engine(db)
     conn = engine.connect()
   
     sql = f"select * from Alltypes"
     data = pd.read_sql(sql, conn)
     conn.close()
     # Return a list of the column names (sample names)
-    return jsonify(list(data.columns)[2:])
+    yr = (data.columns)[2:]
+    yr_reverse  = []
+
+    for i in range(len(yr)-1 , -1, -1):
+        yr_reverse.append(yr[i])
+    return jsonify(yr_reverse)
 
 @app.route("/data/state")
 def get_state():
-    engine = create_engine("sqlite:///db/Alltypes.sqlite")
+    engine = create_engine(db)
     conn = engine.connect()
   
     sql = f"select * from Alltypes"
@@ -128,11 +133,9 @@ def set_energyType():
 
 @app.route("/<energy_type>/<yr>")
 def select_data(energy_type, yr):
-    engine = create_engine("sqlite:///db/Alltypes.sqlite")
+    engine = create_engine(db)
 
     sql = f"select * from Alltypes"
-    
-    # result = engine.execute("sql statement")
 
     conn = engine.connect()
   
@@ -147,7 +150,7 @@ def select_data(energy_type, yr):
         "State":selected_data['State'], 
         "consumption": selected_data[yr]
     }
-    print(data)
+    # print(data)
 
     data = pd.DataFrame(data)
     return data.to_json(orient="records")
@@ -156,7 +159,7 @@ def select_data(energy_type, yr):
 @app.route("/data/<energy_type>/<state>")
 def select_data_per_state(energy_type,state):
     
-    engine = create_engine("sqlite:///db/Alltypes.sqlite")
+    engine = create_engine(db)
     conn = engine.connect()
   
     sql = f"select * from Alltypes"
@@ -170,7 +173,7 @@ def select_data_per_state(energy_type,state):
 
     yr = []
     consumption = []
-    print(consumption_data_tmp)
+    # print(consumption_data_tmp)
     for i in range(2,len(data.columns)):
         yr.append( (data.columns)[i])
         consumption.append(consumption_data_tmp[i])
@@ -191,7 +194,7 @@ def select_data_per_state(energy_type,state):
 
 @app.route("/energy_type/<state>/<yr>")
 def select_energyType_per_state_year(state,yr):
-    engine = create_engine("sqlite:///db/Alltypes.sqlite")
+    engine = create_engine(db)
 
     sql = f"select * from Alltypes"
     

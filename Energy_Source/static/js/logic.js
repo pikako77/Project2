@@ -1,13 +1,19 @@
+////////////////////////////////////
+// Initial setting
 let energyType = 'Coal';
 let yr = 1960;
-let normalizationConst = 10e3;
+let normalizationConst = 10e3; // for plot. apply in all energyType except Nuclear
 let ColorStep = 9;
-let ColorStart = "#ffff99";//"#fafa6e";
-let ColorMid = '#ff0038';//"#fafa6e";
-let ColorEnd = '#002e63';//"#2A4858";
 
+// Color code from https://www.colorhexa.com/color-names
+let ColorStart = "#ffff99";// Canary (light yellow)
+let ColorMid = '#ff0038';//"Carmine red";
+let ColorEnd = '#002e63';//"Cool black";
+let lastColor = "#2c1608"; //Zinnwaldite brown
+
+
+////////////////////////////////////////////
 function init() {
-
 
 	build_selector_yr();
 	build_selector_state();
@@ -17,6 +23,7 @@ function init() {
 }
 
 function build_selector_yr() {
+
 	var selector = d3.select("#selDataset_yr");
 	// Use the list of sample names to populate the select options
 	d3.json("/data/year").then((year) => {
@@ -44,11 +51,11 @@ function build_selector_state() {
 }
 
 
-function get_min(data_array){
+function get_min(data_array) {
 	let min_val = 9999;
 
-	for (i = 0 ; i < data_array.length; i++){
-		if (data_array[i]< min_val){
+	for (i = 0; i < data_array.length; i++) {
+		if (data_array[i] < min_val) {
 			min_val = data_array[i];
 		}
 	}
@@ -56,74 +63,70 @@ function get_min(data_array){
 
 }
 
-function get_max(data_array){
+function get_max(data_array) {
 	let max_val = -9999;
 
-	for (i = 0 ; i < data_array.length; i++){
-		if (data_array[i]> max_val){
+	for (i = 0; i < data_array.length; i++) {
+		if (data_array[i] > max_val) {
 			max_val = data_array[i];
 		}
 	}
 	return max_val;
 }
 
-function get_interval(var_min, var_max, ColorStep){
+function get_interval(var_min, var_max, ColorStep) {
 	let interval = [];
 	let start_val = Math.floor(var_min / 10) * 10;
 	let end_val = Math.floor(var_max / 10) * 10;
 
-	// console.log("get_interval");
-	// console.log("start:",start_val);
-	// console.log("end:",end_val);
-
-	for (let i = start_val; i < ColorStep; i++){
-		interval[i] = start_val + i * (end_val - start_val)/(ColorStep+1);
+	for (let i = start_val; i < ColorStep; i++) {
+		interval[i] = start_val + i * (end_val - start_val) / (ColorStep + 1);
 	}
 
 	// console.log(interval);
 	return interval;
 }
 
-function findIndex(val, interval){
+function findIndex(val, interval) {
 	let valColorIdx = -1; // initialization
 
-	for (let i = 0; i < interval.length; i++){
-		if (val >interval[i] && val <= interval[i+1]) {
+	for (let i = 0; i < interval.length; i++) {
+		if (val > interval[i] && val <= interval[i + 1]) {
 			valColorIdx = i;
 		}
 	}
-	// console.log('findIndex()');
-	// console.log('val,interval[i], interval[i+1] ', val , interval[valColorIdx], interval[valColorIdx+1]);
+	if (val > interval[-1]) {
+		valColorIdx = interval.length + 1;
+	}
+	
 	return valColorIdx;
 }
 
-function getColorScale(colorStart, colorMid, colorEnd){
+function getColorScale(colorStart, colorMid, colorEnd) {
 	const scaleLch = chroma.scale([colorStart, colorMid, colorEnd])
-	.mode("lch")
-	.colors(ColorStep);
+		.mode("lch")
+		.colors(ColorStep);
 
 	return scaleLch;
 
 }
-function getColor(d , var_min, var_max, ColorStep) {
-	// 	chroma.scale(['#fafa6e','#2A4858'])
-	// .mode('lch').colors(6);
-	// Initialize Chroma.
-	const scaleLch = getColorScale( ColorStart ,ColorMid, ColorEnd);
-	
+function getColor(d, var_min, var_max, ColorStep) {
+
+	const scaleLch = getColorScale(ColorStart, ColorMid, ColorEnd);
+
 	let idx = -1;
-	
-	// console.log("getColor()");
-	// console.log("var_min, var_max, step",var_min, var_max, ColorStep );
-	ColorScaleInterval = get_interval(var_min, var_max, ColorStep); 
+
+	ColorScaleInterval = get_interval(var_min, var_max, ColorStep);
 	idx = findIndex(d, ColorScaleInterval);
+	last_idx = ColorScaleInterval.length - 1;
 
 	let colorVal = scaleLch[idx];
+	if (d == 0) colorVal = scaleLch[0];
+	if (d >= ColorScaleInterval[last_idx]) colorVal = lastColor;
 
-	// console.log(idx);
-	// console.log(scaleLch.length);
 	return colorVal;
 }
+
 // Creating map object
 var myMap = L.map("map", {
 	center: [37.8, -96],
@@ -164,30 +167,27 @@ function build_map(energyType, yr) {
 
 				if (statesData.features[i].properties["Abbr"] == state[j]) {
 					tmp = consump[j].replace(",", "").replace(",", "").replace(",", "");
-					// console.log('check reformatting',consump[j], tmp);
-					statesData.features[i].properties["consumption"] = +tmp / normalizationConst;
-					// console.log('check properties',statesData.features[i].properties);
-					consumption_array[i]=+tmp  / normalizationConst;
+					
+					statesData.features[i].properties["consumption"] = +tmp;
+					
+					consumption_array[i] = +tmp;
+
+					if (energyType !== 'Nuclear') {
+						statesData.features[i].properties["consumption"] = statesData.features[i].properties["consumption"] / normalizationConst;
+						consumption_array[i] = consumption_array[i] / normalizationConst;
+					}
 				}
 			}
 
 		}
 
-		//var selector = d3.select("#map");
-		console.log('Check updated GeoJson', statesData);
+
+		//console.log('Check updated GeoJson', statesData);
 		let consumption_min = get_min(consumption_array);
-		console.log(consumption_min);
-
 		let consumption_max = get_max(consumption_array);
-		console.log(consumption_max);
-
-
 
 		function style(feature) {
-			// console.log('style()')
-			// console.log('style feature', feature);
-			// console.log('feature.properties.consumption', feature.properties.consumption);
-			// console.log('feature.properties.name', feature.properties.name);
+
 			let curStyle = {
 				fillColor: getColor(feature.properties.consumption, consumption_min, consumption_max, 9),
 				weight: 2,
@@ -196,12 +196,9 @@ function build_map(energyType, yr) {
 				dashArray: '3',
 				fillOpacity: 0.7
 			};
-			//console.log('curStyle', curStyle);
+
 			return curStyle;
 		}
-
-
-
 
 		function highlightFeature(e) {
 			var layer = e.target;
@@ -224,15 +221,10 @@ function build_map(energyType, yr) {
 			info.update();
 		}
 
-		// function zoomToFeature(e) {
-		// 	map.fitBounds(e.target.getBounds());
-		// }
-
 		function onEachFeature(feature, layer) {
 			layer.on({
 				mouseover: highlightFeature,
 				mouseout: resetHighlight,
-				//click: zoomToFeature
 			});
 		}
 
@@ -244,9 +236,6 @@ function build_map(energyType, yr) {
 			onEachFeature: onEachFeature
 		}).addTo(myMap);
 
-
-
-
 		info.onAdd = function (myMap) {
 			this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
 			this.update();
@@ -255,47 +244,57 @@ function build_map(energyType, yr) {
 
 		// method that we will use to update the control based on feature properties passed
 		info.update = function (props) {
-			// this._div.innerHTML = '<h3>US Population Density</h3>' + (props ?
-			// 	'<b>' +  props.name + '</b><br />' + props.density + '<h4> people / mi<sup>2</sup></h4>'
-			// 	: '<h4>Hover over a state</h4>');
 
-			this._div.innerHTML = '<h3>US Energy consumption </h3>' + (props ?
-				`<h5>${props.name}</h5><h5>${props.consumption} BTU</h5>`
-				: '<h4>Hover over a state</h4>');
+			if (energyType !== 'Nuclear') {
+				this._div.innerHTML = '<h3>US Energy consumption </h3>' + (props ?
+					`<h5>${props.name}</h5><h5>${props.consumption} x 1000 BTU</h5>`
+					: '<h4>Hover over a state</h4>');
+			}
+			else {
+				this._div.innerHTML = '<h3>US Energy consumption </h3>' + (props ?
+					`<h5>${props.name}</h5><h5>${props.consumption} BTU</h5>`
+					: '<h4>Hover over a state</h4>');
+			}
+
 		};
-		//'<h4>{props.name}</h4>'
+
 		info.addTo(myMap);
 
-
-		console.log('before legend.onAdd');
-		console.log(consumption_min);
 		legend.onAdd = function (myMap) {
 
 			grades = [];
-			console.log('legend.onAdd');
-			console.log(consumption_min,consumption_max, ColorStep );
+
 			var div = L.DomUtil.create('div', 'info legend'),
-				// grades = [0, 1000, 2000, 5000, 10000, 50000, 1000000, 1500000];
-				// labels = [];
-				grades =  get_interval(consumption_min, consumption_max, ColorStep), 
+
+				grades = get_interval(consumption_min, consumption_max, ColorStep),
 				labels = [];
-				 console.log('grades',grades);
-				 console.log(consumption_array);
-				colorScale = getColorScale( ColorStart , ColorMid, ColorEnd);
-				console.log('colorScale',colorScale);
+
+			colorScale = getColorScale(ColorStart, ColorMid, ColorEnd);
+
 
 			// loop through our density intervals and generate a label with a colored square for each interval
-			for (var i = 0; i < grades.length; i++) {
+			if (energyType !== 'Nuclear') {
+				for (var i = 0; i < grades.length; i++) {
+					div.innerHTML +=
+						'<i style="background:' + colorScale[i + 1] + '"></i> ' +
+						grades[i] + (grades[i + 1]   ? '&ndash;' + grades[i + 1] + 'x 1000' + '<br>' : '+');
+				}
 				div.innerHTML +=
-					'<i style="background:' + colorScale[i+1] +'"></i> ' +
-					grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + 'x 1000' + '<br>' : '+');
+					'<i style="background:' + lastColor +  '"></i> ';
 			}
-
+			else {
+				for (var i = 0; i < grades.length; i++) {
+					div.innerHTML +=
+						'<i style="background:' + colorScale[i + 1] + '"></i> ' +
+						grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+				}
+				div.innerHTML +=
+					'<i style="background:' + lastColor + '"></i> ';
+			}
 			return div;
 		};
+
 		legend.addTo(myMap);
-
-
 
 	});//d3.json("/data/year").then((year) 
 
@@ -304,7 +303,6 @@ function build_map(energyType, yr) {
 
 
 function optionChanged_nrg(nrgType) {
-
 
 	newEnergyType = nrgType.replace(" ", "");  // remove space for Natural Gas option 
 	console.log("Update energy type", newEnergyType);
@@ -321,8 +319,6 @@ function optionChanged(newEnergyType, newYr) {
 
 	build_map(newEnergyType, newYr);
 }
-
-
 
 ///////////////////
 init();

@@ -1,7 +1,7 @@
 ////////////////////////////////////
 // Initial setting
 let energyType = 'Coal';
-let yr = 1960;
+let yr = 2017;
 let normalizationConst = 10e3; // for plot. apply in all energyType except Nuclear
 let ColorStep = 9;
 
@@ -207,7 +207,7 @@ function build_map(energyType, yr) {
 				weight: 5,
 				color: '#666',
 				dashArray: '',
-				fillOpacity: 0.7
+				fillOpacity: 0.9
 			});
 
 			if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {

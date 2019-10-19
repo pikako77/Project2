@@ -7,7 +7,7 @@ As a data analytics team, we have compiled and analyzed data researching the dif
 We have created several powerful visualizations to help the energy industry recognize these trends and also predict how energy will be produced and consumed in the future. 
 
 Our visualizations were created by using D3 - to retrieve and build data functions, Plotly - to create visuals such as the bar graphs and scatter plots, SQL - this was our database that we used to store our data, Python Flask - to connect our database and populate our visuals with data, and HTML/CSS to deploy our findings to a webpage.  
-We used [chroma](https://vis4.net/chromajs/). Additional information can be found in [GitHub](https://github.com/gka/chroma.js) 
+We used [chroma.js](https://vis4.net/chromajs/) to compute the map color scale. Additional information can be found in [GitHub](https://github.com/gka/chroma.js) 
 
 ![Main](readme_pics/main_energy.PNG)
 

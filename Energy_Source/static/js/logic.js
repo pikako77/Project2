@@ -1,5 +1,6 @@
-var energyType = 'Coal';
-var yr = 1960;
+let energyType = 'Coal';
+let yr = 1960;
+let normalizationConst = 10e3;
 
 function init() {
 
@@ -12,8 +13,6 @@ function init() {
 }
 
 function build_selector_yr() {
-
-
 	var selector = d3.select("#selDataset_yr");
 	// Use the list of sample names to populate the select options
 	d3.json("/data/year").then((year) => {
@@ -40,140 +39,140 @@ function build_selector_state() {
 	}); //d3.json("/data/year").then((year)
 }
 
-// function modify_geoJson(energyType, yr) {
-// 	console.log('modify_geoJson', energyType, yr);
 
-// 	let state = [];
-// 	let consump = [];
+function get_min(data_array){
+	let min_val = 9999;
+
+	for (i = 0 ; i < data_array.length; i++){
+		if (data_array[i]< min_val){
+			min_val = data_array[i];
+		}
+	}
+	return min_val;
+
+}
+
+function get_max(data_array){
+	let max_val = -9999;
+
+	for (i = 0 ; i < data_array.length; i++){
+		if (data_array[i]> max_val){
+			max_val = data_array[i];
+		}
+	}
+	return max_val;
+}
+
+function get_interval(var_min, var_max, ColorStep){
+	let interval = [];
+	let start_val = Math.floor(var_min / 10) * 10;
+	let end_val = Math.floor(var_max / 10) * 10;
+
+	console.log("get_interval");
+	console.log("start:",start_val);
+	console.log("end:",end_val);
+
+	for (let i = start_val; i < ColorStep; i++){
+		interval[i] = start_val + i * (end_val - start_val)/(ColorStep+1);
+	}
+
+	console.log(interval);
+	return interval;
+}
+
+function findIndex(val, interval){
+	let valColorIdx = -1; // initialization
+
+	for (let i = 0; i < interval.length; i++){
+		if (val >interval[i] && val < interval[i+1]) {
+			valColorIdx = i;
+		}
+	}
+	console.log('findIndex()');
+	console.log('val,interval[i], interval[i+1] ', val , interval[valColorIdx], interval[valColorIdx+1]);
+	return valColorIdx;
+}
+
+
+function getColor(d , var_min, var_max, ColorStep) {
+	// 	chroma.scale(['#fafa6e','#2A4858'])
+	// .mode('lch').colors(6);
+	// Initialize Chroma.
+	const scaleLch = chroma.scale(["#fafa6e", "#2A4858"])
+					.mode("lch")
+					.colors(ColorStep);
 	
+	let idx = -1;
+	
+	console.log("getColor()");
+	console.log("var_min, var_max, step",var_min, var_max, ColorStep );
+	ColorScaleInterval = get_interval(var_min, var_max, ColorStep); 
+	idx = findIndex(d, ColorScaleInterval);
 
-// 	d3.json("/data/year").then((year) => {
-// 		var selector_yr = d3.select("#selDataset_yr");
-// 		var selector_nrg = d3.select("#selDataset_enegeryType");
+	let colorVal = scaleLch[idx];
 
-// 		d3.json("/data/energyType").then((energyType) => {
-// 			energyType.forEach((sample) => {
-// 				selector_nrg.append("option")
-// 					.text(sample)
-// 					.property("value", sample);
-// 			}); //foreach energyType
-// 			year.forEach((sample) => {
-// 				selector_yr.append("option")
-// 					.text(sample)
-// 					.property("value", sample);
-// 			}); //foreach year
+	console.log(idx);
+	console.log(scaleLch.length);
+	return colorVal;
+}
+// Creating map object
+var myMap = L.map("map", {
+	center: [37.8, -96],
+	zoom: 4
+});
+
+// Adding tile layer
+L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+	attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+	maxZoom: 18,
+	id: "mapbox.light",
+	accessToken: API_KEY
+}).addTo(myMap);
 
 
-// 			d3.json(`/${energyType}/${yr}`).then((data) => {
-// 				// console.log(data.length);
-// 				for (i = 0; i < data.length; i++) {
-// 					state[i] = data[i].State;
-// 					consump[i] = data[i].consumption;
-// 				}
+var legend = L.control({ position: 'bottomright' });
+var info = L.control();
 
-// 				for (i = 0; i < statesData.features.length; i++) {
-// 					for (j = 0; j < state.length; j++) {
 
-// 						if (statesData.features[i].properties["Abbr"] == state[j]) {
-// 							tmp = consump[j].replace(",", "").replace(",", "");
-// 							console.log(consump[j], tmp);
-// 							statesData.features[i].properties["consumption"] = +tmp;
-// 							console.log(statesData.features[i].properties);
-// 						}
-// 					}
-
-// 				}
-
-// 			}); //d3.json(`/${energyType}/${yr}`).then((data)
-// 		}); //d3.json("/data/energyType").then((year) 
-// 	});//d3.json("/data/year").then((year) 
-// 			return statesData;
-// }
-		// Creating map object
-		var myMap = L.map("map", {
-			center: [37.8, -96],
-			zoom: 4
-		});
-
-		// Adding tile layer
-		L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
-			attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
-			maxZoom: 18,
-			id: "mapbox.light",
-			accessToken: API_KEY
-		}).addTo(myMap);
-
-		
-		var legend = L.control({ position: 'bottomright' });
-		var info = L.control();
-		// var selector = d3.select("#map");
-		
 function build_map(energyType, yr) {
-		console.log('modify_geoJson', energyType, yr);
+	console.log('modify_geoJson', energyType, yr);
 
 	let state = [];
 	let consump = [];
-	
-
-	// d3.json("/data/year").then((yr_label) => {
-		
-	// 	var selector_yr = d3.select("#selDataset_yr");
-	// 	var selector_nrg = d3.select("#selDataset_enegeryType");
-	// 	console.log('build map', energyType, yr);
-		
-	// 	d3.json("/data/energyType").then((energyType_label) => {
-			
-	// 		energyType_label.forEach((sample) => {
-	// 			selector_nrg.append("option")
-	// 				.text(sample)
-	// 				.property("value", sample);
-	// 		}); //foreach energyType
-	// 		console.log('yr', yr_label);
-	// 		yr_label.forEach((sample) => {
-	// 			selector_yr.append("option")
-	// 				.text(sample)
-	// 				.property("value", sample);
-	// 		}); //foreach year
+	let consumption_array = [];
 
 
-			d3.json(`/${energyType}/${yr}`).then((data) => {
-				console.log('d3.json(`/${energyType}/${yr}`)', data);
-				console.log(data.length);
-				for (i = 0; i < data.length; i++) {
-					state[i] = data[i].State;
-					consump[i] = data[i].consumption;
-				}
-
-				for (i = 0; i < statesData.features.length; i++) {
-					for (j = 0; j < state.length; j++) {
-
-						if (statesData.features[i].properties["Abbr"] == state[j]) {
-							tmp = consump[j].replace(",", "").replace(",", "").replace(",", "");
-							// console.log('check reformatting',consump[j], tmp);
-							statesData.features[i].properties["consumption"] = +tmp;
-							// console.log('check properties',statesData.features[i].properties);
-						}
-					}
-
-				}
-
-				//var selector = d3.select("#map");
-		console.log('Check updated GeoJson', statesData);
-
-		function getColor(d) {
-			// 	chroma.scale(['#fafa6e','#2A4858'])
-			// .mode('lch').colors(6);
-
-			return d > 1500000 ? '#d53e4f' :
-				d > 1000000 ? '#f46d43' :
-					d > 50000 ? '#fdae61' :
-						d > 10000 ? '#fee08b' :
-							d > 5000 ? '#ffffbf' :
-								d > 2000 ? 'e6f598' :
-									d > 1000 ? '#abdda4' :
-										d > 0 ? '#66c2a5' :
-											'#3288bd';
+	d3.json(`/${energyType}/${yr}`).then((data) => {
+		console.log('d3.json(`/${energyType}/${yr}`)', data);
+		console.log(data.length);
+		for (i = 0; i < data.length; i++) {
+			state[i] = data[i].State;
+			consump[i] = data[i].consumption;
 		}
+
+		for (i = 0; i < statesData.features.length; i++) {
+			for (j = 0; j < state.length; j++) {
+
+				if (statesData.features[i].properties["Abbr"] == state[j]) {
+					tmp = consump[j].replace(",", "").replace(",", "").replace(",", "");
+					// console.log('check reformatting',consump[j], tmp);
+					statesData.features[i].properties["consumption"] = +tmp / normalizationConst;
+					// console.log('check properties',statesData.features[i].properties);
+					consumption_array[i]=+tmp  / normalizationConst;
+				}
+			}
+
+		}
+
+		//var selector = d3.select("#map");
+		console.log('Check updated GeoJson', statesData);
+		let consumption_min = get_min(consumption_array);
+		console.log(consumption_min);
+
+		let consumption_max = get_max(consumption_array);
+		console.log(consumption_max);
+
+
 
 		function style(feature) {
 			// console.log('style()')
@@ -181,14 +180,14 @@ function build_map(energyType, yr) {
 			// console.log('feature.properties.consumption', feature.properties.consumption);
 			// console.log('feature.properties.name', feature.properties.name);
 			let curStyle = {
-				fillColor: getColor(feature.properties.consumption),
+				fillColor: getColor(feature.properties.consumption, consumption_min, consumption_max, 9),
 				weight: 2,
 				opacity: 1,
 				color: 'white',
 				dashArray: '3',
 				fillOpacity: 0.7
 			};
-			console.log('curStyle', curStyle);
+			//console.log('curStyle', curStyle);
 			return curStyle;
 		}
 
@@ -280,31 +279,31 @@ function build_map(energyType, yr) {
 		legend.addTo(myMap);
 
 
-		
+
 	});//d3.json("/data/year").then((year) 
-				
-				
+
+
 }
 
 
 function optionChanged_nrg(nrgType) {
 
 
-	newEnergyType = nrgType.replace(" ","") ;  // remove space for Natural Gas option 
-	console.log("Update energy type",newEnergyType);
-	optionChanged(newEnergyType , yr);
+	newEnergyType = nrgType.replace(" ", "");  // remove space for Natural Gas option 
+	console.log("Update energy type", newEnergyType);
+	optionChanged(newEnergyType, yr);
 }
 
 function optionChanged_yr(yr) {
-	newYr = yr ;
-	console.log("Update yr",newYr);
-	optionChanged(EnergyType , newYr);
+	newYr = yr;
+	console.log("Update yr", newYr);
+	optionChanged(energyType, newYr);
 }
 
-function optionChanged(newEnergyType,newYr) {
+function optionChanged(newEnergyType, newYr) {
 
 	build_map(newEnergyType, newYr);
-}		
+}
 
 
 

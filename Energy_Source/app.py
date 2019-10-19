@@ -217,4 +217,5 @@ def select_energyType_per_state_year(state,yr):
     return jsonify(selected_data)
 
 if __name__ == "__main__":
-    app.run(port=5015, debug=True)
+    # app.run(port=5015, debug=True)
+    app.run()

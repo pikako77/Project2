@@ -30,7 +30,9 @@ app = Flask(__name__)
 # Samples_Metadata = Base.classes.sample_metadata
 # Samples = Base.classes.samples
 
-db ="sqlite:///db/Alltypes.sqlite"
+# db ="sqlite:///db/Alltypes.sqlite"
+db ="postgres://xxlseihlmohnre:6667aa7c4ad666c7e6c92755418ff0486278365bde892a02ab7243afd5ca65ad@ec2-50-19-127-115.compute-1.amazonaws.com:5432/denrnahfu7g51u"
+
 
 @app.route("/")
 def index():
@@ -122,7 +124,7 @@ def get_state():
     conn.close()
 
     # Return a list of the column names (sample names)
-    return jsonify(list(data["State"].head(52)))
+    return jsonify(list(data["state"].head(52)))
 
 @app.route("/data/energyType")
 def set_energyType():
@@ -142,12 +144,12 @@ def select_data(energy_type, yr):
     data = pd.read_sql(sql, conn)
     conn.close()
 
-    tmp_data = data.loc[:,['Type','State',yr]]
+    tmp_data = data.loc[:,['type','state',yr]]
     
-    selected_data = tmp_data[tmp_data['Type']==energy_type ]
+    selected_data = tmp_data[tmp_data['type']==energy_type ]
 
     data = {
-        "State":selected_data['State'], 
+        "State":selected_data['state'], 
         "consumption": selected_data[yr]
     }
     # print(data)
@@ -166,8 +168,8 @@ def select_data_per_state(energy_type,state):
     data = pd.read_sql(sql, conn)
     conn.close()
 
-    tmp = data[data['Type'] == energy_type]
-    consumption_data_tmp = tmp[tmp['State']==state].iloc[0].tolist()
+    tmp = data[data['type'] == energy_type]
+    consumption_data_tmp = tmp[tmp['state']==state].iloc[0].tolist()
 
     # test_Data ={}
 
@@ -204,7 +206,7 @@ def select_energyType_per_state_year(state,yr):
   
     data = pd.read_sql(sql, conn)
     conn.close()
-    tmp = data[data['State'] == state]
+    tmp = data[data['state'] == state]
     sel_data =tmp[yr].tolist()
     # print(sel_data)
     data_label =['Coal','NaturalGas','Petroleum','Nuclear','Renewable']

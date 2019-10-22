@@ -41,6 +41,7 @@ Open the web browser and redirect to your server ```http://127.0.0.1:5000/```
 
 ### Heroku
 A compiled version of the app can be found on [Heroku](https://www.heroku.com/home) at:
+[https://heroku-energy-consumption-rice.herokuapp.com/](https://heroku-energy-consumption-rice.herokuapp.com/)
 
 
 

@@ -2,6 +2,7 @@ data/tmp/*
 tmp_code/*
 tmp/*
 Energy_Source*/*
+Energy_Source\static\js\config.js
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
